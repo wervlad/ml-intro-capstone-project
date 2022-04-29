@@ -1,4 +1,4 @@
-from 9_evaluation_selection import __version__
+from forestml import __version__
 
 
 def test_version():

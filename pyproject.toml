@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "9_evaluation_selection"
+name = "forestml"
 version = "0.1.0"
 description = ""
 authors = ["Vlad Rusakov <24524555+wervlad@users.noreply.github.com>"]
