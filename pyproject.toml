@@ -10,6 +10,7 @@ authors = ["Vlad Rusakov"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+click = "^8.1.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
