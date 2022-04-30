@@ -8,6 +8,9 @@ homepage = "https://github.com/wervlad/9_evaluation_selection"
 repository = "https://github.com/wervlad/9_evaluation_selection"
 authors = ["Vlad Rusakov"]
 
+[tool.poetry.scripts]
+train = "forestml.train:train"
+
 [tool.poetry.dependencies]
 python = "^3.9"
 click = "^8.1.3"
