@@ -3,8 +3,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 
-def create_pipeline(random_state: int) -> Pipeline:
-    scaler = StandardScaler()
-    classifier = LogisticRegression(random_state=random_state)
-    pipeline = Pipeline(steps=[("scaler", scaler), ("classifier", classifier)])
-    return pipeline
+def create_pipeline(use_scaler: bool, random_state: int) -> Pipeline:
+    pipeline_steps = []
+    if use_scaler:
+        pipeline_steps.append(("scaler", StandardScaler()))
+    pipeline_steps.append(("classifier", LogisticRegression(random_state=random_state)))
+    return Pipeline(steps=pipeline_steps)
