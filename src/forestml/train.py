@@ -38,8 +38,8 @@ from .pipeline import create_pipeline
     show_default=True,
     type=bool,
 )
-@click.option("--max-iter", default=100, type=int)
-@click.option("--logreg-c", default=1.0, type=float)
+@click.option("--max-iter", default=100, show_default=True, type=int)
+@click.option("--logreg-c", default=1.0, show_default=True, type=float)
 def train(
     dataset_path: Path,
     save_model_path: Path,
