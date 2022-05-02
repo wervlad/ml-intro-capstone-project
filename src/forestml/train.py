@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from .data import get_dataset
 from .pipeline import create_pipeline
 
+
 @click.command()
 @click.option(
     "-d",

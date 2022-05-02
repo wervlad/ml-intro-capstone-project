@@ -10,7 +10,11 @@ def create_pipeline(
     if use_scaler:
         pipeline_steps.append(("scaler", StandardScaler()))
     pipeline_steps.append(
-        ("classifier", LogisticRegression(random_state=random_state,
-                                          max_iter=max_iter, C=logreg_C)),
+        (
+            "classifier",
+            LogisticRegression(
+                random_state=random_state, max_iter=max_iter, C=logreg_C
+            ),
+        ),
     )
     return Pipeline(steps=pipeline_steps)
