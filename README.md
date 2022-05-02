@@ -2,7 +2,7 @@ Homework for RS School Machine Learning course.
 
 This project uses [Forest train](https://www.kaggle.com/competitions/forest-cover-type-prediction) dataset.
 
-# Usage
+## Usage
 This package allows you to train model for predicting forest cover type.
 1. Clone this repository to your machine.
 2. Download Forest train dataset, save csv locally (default path is *data/train.csv* in repository's root).
