@@ -15,9 +15,13 @@ poetry install --no-dev
 ```sh
 poetry run train -d <path to csv with data> -s <path to save trained model>
 ```
-You can configure additional options in the CLI. To get a full list of them, use help:
+You can configure additional options (such as hyperparameters) in the CLI. To get a full list of them, use help:
 ```sh
 poetry run train --help
+```
+6. Run MLflow UI to see the information about experiments you conducted:
+```sh
+poetry run mlflow ui
 ```
 
 ## Development
