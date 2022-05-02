@@ -5,7 +5,7 @@ import mlflow
 import mlflow.sklearn
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import train_test_split
 from .data import get_dataset
 from .pipeline import create_pipeline
@@ -59,10 +59,19 @@ def train(
         pipeline = create_pipeline(use_scaler, max_iter, logreg_c, random_state)
         pipeline.fit(features_train, target_train)
         accuracy = accuracy_score(target_val, pipeline.predict(features_val))
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            target_val, pipeline.predict(features_val), average="weighted"
+        )
         mlflow.log_param("use_scaler", use_scaler)
         mlflow.log_param("max_iter", max_iter)
         mlflow.log_param("logreg_c", logreg_c)
         mlflow.log_metric("accuracy", accuracy)
+        mlflow.log_metric("precision", precision)
+        mlflow.log_metric("recall", recall)
+        mlflow.log_metric("f1", f1)
         click.echo(f"Accuracy: {accuracy}.")
+        click.echo(f"Precision: {precision}.")
+        click.echo(f"Recall: {recall}.")
+        click.echo(f"F1: {f1}.")
         dump(pipeline, save_model_path)
         click.echo(f"Model is saved to {save_model_path}.")
