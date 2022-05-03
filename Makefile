@@ -1,5 +1,8 @@
 SOURCES = $(wildcard *.py) $(wildcard */*.py) $(wildcard */*/*.py)
 
+run_mlflow_ui:
+	poetry run mlflow ui
+
 profiling_report:
 	poetry run profiling_report
 
