@@ -6,14 +6,20 @@ from math import inf
 from joblib import dump
 from pathlib import Path
 from sklearn.base import BaseEstimator
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.manifold import TSNE
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from typing import Tuple
 from .data import get_dataset, DATASET_PATH
+import warnings
+
+# Ignore tSNE FutureWarnings
+warnings.filterwarnings('ignore', category=FutureWarning)
 
 @click.group()
 @click.pass_context
@@ -44,6 +50,12 @@ from .data import get_dataset, DATASET_PATH
     show_default=True,
     type=bool,
 )
+@click.option(
+    "--transform",
+    default=None,
+    show_default=True,
+    type=click.Choice(["lda", "tsne", "None"]),
+)
 def train(
     ctx: click.core.Context,
     dataset_path: Path,
@@ -51,6 +63,7 @@ def train(
     random_state: int,
     n_splits: int,
     use_scaler: bool,
+    transform: str,
 ) -> None:
     ctx.ensure_object(dict)
     ctx.obj["X"], ctx.obj["y"] = get_dataset(dataset_path)
@@ -58,6 +71,7 @@ def train(
     ctx.obj["random_state"] = random_state
     ctx.obj["n_splits"] = n_splits
     ctx.obj["use_scaler"] = use_scaler
+    ctx.obj["transform"] = transform
 
 @train.command()
 @click.pass_context
@@ -133,6 +147,22 @@ def run_experiment(
         f1_list = []
         X = ctx.obj["X"].to_numpy()
         y = ctx.obj["y"].to_numpy()
+        if ctx.obj["transform"] == "tsne":
+            X = TSNE(
+                n_components=2,
+                learning_rate="auto",
+                init="pca",
+                random_state=42
+            ).fit_transform(X)
+        elif ctx.obj["transform"] == "lda":
+            X = LinearDiscriminantAnalysis(
+                n_components=2,
+                priors=None,
+                shrinkage='auto',
+                solver='eigen',
+                store_covariance=False,
+                tol=0.0001
+            ).fit_transform(X, y)
         kf = KFold(n_splits=ctx.obj["n_splits"],
                    shuffle=True,
                    random_state=ctx.obj["random_state"])
@@ -160,6 +190,7 @@ def run_experiment(
             mlflow.log_param("metric", ctx.obj["metric"])
             mlflow.log_param("weights", ctx.obj["weights"])
         mlflow.log_param("use_scaler", ctx.obj["use_scaler"])
+        mlflow.log_param("transform", ctx.obj["transform"])
         mlflow.log_metric("accuracy", sum(accuracy_list) / len(accuracy_list))
         mlflow.log_metric("precision", sum(precision_list) / len(precision_list))
         mlflow.log_metric("recall", sum(recall_list) / len(recall_list))
