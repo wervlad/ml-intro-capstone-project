@@ -1,3 +1,4 @@
+from math import inf
 from pathlib import Path
 from joblib import dump
 import click
@@ -6,10 +7,9 @@ import mlflow.sklearn
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 from .data import get_dataset
 from .pipeline import create_pipeline
-
 
 @click.command()
 @click.option(
@@ -28,10 +28,10 @@ from .pipeline import create_pipeline
 )
 @click.option("--random-state", default=42, show_default=True, type=int)
 @click.option(
-    "--test-split-ratio",
-    default=0.2,
+    "--n-splits",
+    default=5,
     show_default=True,
-    type=click.FloatRange(0, 1, min_open=True, max_open=True),
+    type=click.IntRange(2, inf),
 )
 @click.option(
     "--use-scaler",
@@ -45,30 +45,44 @@ def train(
     dataset_path: Path,
     save_model_path: Path,
     random_state: int,
-    test_split_ratio: float,
+    n_splits: int,
     use_scaler: bool,
     max_iter: int,
     logreg_c: float,
 ) -> None:
-    features_train, features_val, target_train, target_val = get_dataset(
-        dataset_path,
-        random_state,
-        test_split_ratio,
-    )
     with mlflow.start_run():
+        accuracy_list = []
+        precision_list = []
+        recall_list = []
+        f1_list = []
+        X, y = get_dataset(dataset_path)
+        X = X.to_numpy()
+        y = y.to_numpy()
+        kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
         pipeline = create_pipeline(use_scaler, max_iter, logreg_c, random_state)
-        pipeline.fit(features_train, target_train)
-        accuracy = accuracy_score(target_val, pipeline.predict(features_val))
-        precision, recall, f1, _ = precision_recall_fscore_support(
-            target_val, pipeline.predict(features_val), average="weighted"
-        )
+        # use KFold cross-validator to calculate metrics
+        for train_indices, test_indices in kf.split(X, y):
+            X_train = X[train_indices]
+            X_val = X[test_indices]
+            y_train = y[train_indices]
+            y_val = y[test_indices]
+            pipeline.fit(X_train, y_train)
+            accuracy = accuracy_score(y_val, pipeline.predict(X_val))
+            precision, recall, f1, _ = precision_recall_fscore_support(
+                y_val, pipeline.predict(X_val), average="weighted"
+            )
+            accuracy_list.append(accuracy)
+            precision_list.append(precision)
+            recall_list.append(recall)
+            f1_list.append(f1)
+        pipeline.fit(X, y)  # finally train model on whole dataset
         mlflow.log_param("use_scaler", use_scaler)
         mlflow.log_param("max_iter", max_iter)
         mlflow.log_param("logreg_c", logreg_c)
-        mlflow.log_metric("accuracy", accuracy)
-        mlflow.log_metric("precision", precision)
-        mlflow.log_metric("recall", recall)
-        mlflow.log_metric("f1", f1)
+        mlflow.log_metric("accuracy", sum(accuracy_list) / len(accuracy_list))
+        mlflow.log_metric("precision", sum(precision_list) / len(precision_list))
+        mlflow.log_metric("recall", sum(recall_list) / len(recall_list))
+        mlflow.log_metric("f1", sum(f1_list) / len(f1_list))
         click.echo(f"Accuracy: {accuracy}.")
         click.echo(f"Precision: {precision}.")
         click.echo(f"Recall: {recall}.")
