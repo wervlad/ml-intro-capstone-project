@@ -7,6 +7,7 @@ from joblib import dump
 from pathlib import Path
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
@@ -69,6 +70,7 @@ def logreg(
     max_iter: int,
     c: float,
 ) -> None:
+    ctx.obj["model"] = "LogReg"
     ctx.obj["max_iter"] = max_iter
     ctx.obj["c"] = c
     model = LogisticRegression(
@@ -79,6 +81,39 @@ def logreg(
         create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
     )
 
+@train.command()
+@click.pass_context
+@click.option("--n-neighbors", default=5, show_default=True, type=int)
+@click.option(
+    "--metric",
+    default="minkowski",
+    show_default=True,
+    type=click.Choice(["euclidean", "manhattan", "chebyshev", "minkowski",
+                       "wminkowski", "seuclidean", "mahalanobis"]),
+)
+@click.option(
+    "--weights",
+    default="uniform",
+    show_default=True,
+    type=click.Choice(["uniform", "distance"]),
+)
+def knn(
+    ctx: click.core.Context,
+    n_neighbors: int,
+    metric: str,
+    weights:str,
+) -> None:
+    ctx.obj["model"] = "KNN"
+    ctx.obj["n_neighbors"] = n_neighbors
+    ctx.obj["metric"] = metric
+    ctx.obj["weights"] = weights
+    model = KNeighborsClassifier(
+        n_neighbors=n_neighbors, metric=metric, weights=weights
+    )
+    run_experiment(
+        ctx,
+        create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+    )
 
 def create_pipeline(
     use_scaler: bool, model: BaseEstimator
@@ -119,9 +154,14 @@ def run_experiment(
             recall_list.append(recall)
             f1_list.append(f1)
         pipeline.fit(X, y)  # finally train model on whole dataset
+        if ctx.obj["model"] == "LogReg":
+            mlflow.log_param("max_iter", ctx.obj["max_iter"])
+            mlflow.log_param("logreg_c", ctx.obj["c"])
+        elif ctx.obj["model"] == "KNN":
+            mlflow.log_param("n_neighbors", ctx.obj["n_neighbors"])
+            mlflow.log_param("metric", ctx.obj["metric"])
+            mlflow.log_param("weights", ctx.obj["weights"])
         mlflow.log_param("use_scaler", ctx.obj["use_scaler"])
-        mlflow.log_param("max_iter", ctx.obj["max_iter"])
-        mlflow.log_param("logreg_c", ctx.obj["c"])
         mlflow.log_metric("accuracy", sum(accuracy_list) / len(accuracy_list))
         mlflow.log_metric("precision", sum(precision_list) / len(precision_list))
         mlflow.log_metric("recall", sum(recall_list) / len(recall_list))
