@@ -13,13 +13,14 @@ from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from typing import Tuple
+from .data import get_dataset, DATASET_PATH
 
 @click.group()
 @click.pass_context
 @click.option(
     "-d",
     "--dataset-path",
-    default="data/train.csv",
+    default=DATASET_PATH,
     show_default=True,
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
 )
@@ -52,10 +53,7 @@ def train(
     use_scaler: bool,
 ) -> None:
     ctx.ensure_object(dict)
-    dataset = pd.read_csv(dataset_path)
-    click.echo(f"Dataset shape: {dataset.shape}.")
-    ctx.obj["X"] = dataset.drop("Cover_Type", axis=1)
-    ctx.obj["y"] = dataset["Cover_Type"]
+    ctx.obj["X"], ctx.obj["y"] = get_dataset(dataset_path)
     ctx.obj["save_model_path"] = save_model_path
     ctx.obj["random_state"] = random_state
     ctx.obj["n_splits"] = n_splits
