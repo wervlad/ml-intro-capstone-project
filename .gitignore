@@ -133,3 +133,7 @@ data
 
 # mlflow database
 mlruns
+
+# exuberant ctags
+tags
+include_tags
