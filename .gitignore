@@ -137,3 +137,6 @@ mlruns
 # exuberant ctags
 tags
 include_tags
+
+# vim
+*.swp
