@@ -182,6 +182,7 @@ def run_experiment(
             recall_list.append(recall)
             f1_list.append(f1)
         pipeline.fit(X, y)  # finally train model on whole dataset
+        mlflow.log_param("model", ctx.obj["model"])
         if ctx.obj["model"] == "LogReg":
             mlflow.log_param("max_iter", ctx.obj["max_iter"])
             mlflow.log_param("logreg_c", ctx.obj["c"])
