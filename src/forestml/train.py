@@ -1,4 +1,5 @@
 import click
+import numpy as np
 import mlflow
 import mlflow.sklearn
 import pandas as pd
@@ -11,6 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.manifold import TSNE
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -56,6 +58,12 @@ warnings.filterwarnings('ignore', category=FutureWarning)
     show_default=True,
     type=click.Choice(["lda", "tsne", "None"]),
 )
+@click.option(
+    "--search",
+    default="manual",
+    show_default=True,
+    type=click.Choice(["manual", "random"]),
+)
 def train(
     ctx: click.core.Context,
     dataset_path: Path,
@@ -64,6 +72,7 @@ def train(
     n_splits: int,
     use_scaler: bool,
     transform: str,
+    search: str,
 ) -> None:
     ctx.ensure_object(dict)
     ctx.obj["X"], ctx.obj["y"] = get_dataset(dataset_path)
@@ -72,6 +81,7 @@ def train(
     ctx.obj["n_splits"] = n_splits
     ctx.obj["use_scaler"] = use_scaler
     ctx.obj["transform"] = transform
+    ctx.obj["search"] = search
 
 @train.command()
 @click.pass_context
@@ -88,10 +98,16 @@ def logreg(
     model = LogisticRegression(
         random_state=ctx.obj["random_state"], max_iter=max_iter, C=c
     )
-    run_experiment(
-        ctx,
-        create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
-    )
+    if ctx.obj["search"] == "manual":
+        run_experiment(
+            ctx,
+            create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+        )
+    else:
+        run_experiment_random_grid(
+            ctx,
+            create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+        )
 
 @train.command()
 @click.pass_context
@@ -122,10 +138,16 @@ def knn(
     model = KNeighborsClassifier(
         n_neighbors=n_neighbors, metric=metric, weights=weights
     )
-    run_experiment(
-        ctx,
-        create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
-    )
+    if ctx.obj["search"] == "manual":
+        run_experiment(
+            ctx,
+            create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+        )
+    else:
+        run_experiment_random_grid(
+            ctx,
+            create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+        )
 
 def create_pipeline(
     use_scaler: bool, model: BaseEstimator
@@ -190,6 +212,7 @@ def run_experiment(
             mlflow.log_param("n_neighbors", ctx.obj["n_neighbors"])
             mlflow.log_param("metric", ctx.obj["metric"])
             mlflow.log_param("weights", ctx.obj["weights"])
+        mlflow.log_param("search", "KFold (manual)")
         mlflow.log_param("use_scaler", ctx.obj["use_scaler"])
         mlflow.log_param("transform", ctx.obj["transform"])
         mlflow.log_metric("accuracy", sum(accuracy_list) / len(accuracy_list))
@@ -202,3 +225,106 @@ def run_experiment(
         click.echo(f"F1: {f1}.")
         dump(pipeline, ctx.obj["save_model_path"])
         click.echo(f"Model is saved to {ctx.obj['save_model_path']}.")
+
+def run_experiment_random_grid(
+    ctx: click.core.Context,
+    pipeline: Pipeline,
+) -> None:
+    with mlflow.start_run():
+        accuracy_list = []
+        precision_list = []
+        recall_list = []
+        f1_list = []
+        best_params_list = []
+        X = ctx.obj["X"].to_numpy()
+        y = ctx.obj["y"].to_numpy()
+        if ctx.obj["transform"] == "tsne":
+            X = TSNE(
+                n_components=2,
+                learning_rate="auto",
+                init="pca",
+                random_state=42
+            ).fit_transform(X)
+        elif ctx.obj["transform"] == "lda":
+            X = LinearDiscriminantAnalysis(
+                n_components=2,
+                priors=None,
+                shrinkage='auto',
+                solver='eigen',
+                store_covariance=False,
+                tol=0.0001
+            ).fit_transform(X, y)
+        cv_outer = KFold(
+            n_splits=10, shuffle=True, random_state=ctx.obj["random_state"]
+        )
+        if ctx.obj["model"] == "LogReg":
+            PARAMS = {
+                "classifier__max_iter": [1000],
+                "classifier__C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 1000, 10000],
+            }
+        elif ctx.obj["model"] == "KNN":
+            PARAMS = {
+                "classifier__n_neighbors": np.logspace(0, 3, num=100, dtype=int),
+                "classifier__weights": ["uniform", "distance"],
+                "classifier__metric": [
+                    "euclidean",
+                    "manhattan",
+                    "chebyshev",
+                    "minkowski",
+                ]
+            }
+        outer_results = list()
+        click.echo("Running Nested CV with RandomSearch in inner loop")
+        for train_indices, test_indices in cv_outer.split(X):
+            X_train, X_test = X[train_indices, :], X[test_indices, :]
+            y_train, y_test = y[train_indices], y[test_indices]
+            cv_inner = KFold(
+                n_splits=3, shuffle=True, random_state=ctx.obj["random_state"]
+            )
+            random_search = RandomizedSearchCV(
+                estimator=pipeline,
+                param_distributions=PARAMS,
+                n_iter=5,
+                scoring="accuracy",
+                n_jobs=-1,
+                cv=cv_inner,
+                refit=True,
+            )
+            best_model = random_search.fit(X_train, y_train)
+            accuracy = accuracy_score(y_test, best_model.predict(X_test))
+            precision, recall, f1, _ = precision_recall_fscore_support(
+                y_test, best_model.predict(X_test), average="weighted"
+            )
+            click.echo(f"{accuracy}, {best_model.best_params_}")
+            accuracy_list.append(accuracy)
+            precision_list.append(precision)
+            recall_list.append(recall)
+            f1_list.append(f1)
+            best_params_list.append(best_model.best_params_)
+        mlflow.log_param("model", ctx.obj["model"])
+        best_of_the_best = best_params_list[np.array(accuracy_list).argmax()]
+        click.echo(f"Best params: {best_of_the_best}")
+        if ctx.obj["model"] == "LogReg":
+            mlflow.log_param("max_iter", best_of_the_best["classifier__max_iter"])
+            mlflow.log_param("logreg_c", best_of_the_best["classifier__C"])
+        elif ctx.obj["model"] == "KNN":
+            mlflow.log_param("n_neighbors", best_of_the_best["classifier__n_neighbors"])
+            mlflow.log_param("metric", best_of_the_best["classifier__metric"])
+            mlflow.log_param("weights", best_of_the_best["classifier__weights"])
+        mlflow.log_param("search", "NestedCV (random)")
+        mlflow.log_param("use_scaler", ctx.obj["use_scaler"])
+        mlflow.log_param("transform", ctx.obj["transform"])
+        mlflow.log_metric("accuracy", np.mean(accuracy_list))
+        mlflow.log_metric("precision", np.mean(precision_list))
+        mlflow.log_metric("recall", np.mean(recall_list))
+        mlflow.log_metric("f1", np.mean(f1_list))
+        click.echo(f"Accuracy: {np.mean(accuracy_list):.3f} ({np.std(accuracy_list):.3f})")
+        click.echo(f"Precision: {np.mean(precision_list):.3f} ({np.std(precision_list):.3f})")
+        click.echo(f"Recall: {np.mean(recall_list):.3f} ({np.std(recall_list):.3f})")
+        click.echo(f"F1: {np.mean(f1_list):.3f} ({np.std(f1_list):.3f})")
+        # finally fit best model on whole dataset and save it
+        pipeline.set_params(**best_of_the_best)
+        pipeline.fit(X, y)
+        dump(pipeline, ctx.obj["save_model_path"])
+        click.echo(f"Model is saved to {ctx.obj['save_model_path']}.")
+        # summarize the estimated performance of the model
