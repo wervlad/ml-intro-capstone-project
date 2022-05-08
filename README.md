@@ -1,5 +1,7 @@
 Homework for RS School Machine Learning course.
 
+**WARNING! Code in this repository has significant tech debt. I'm sorry I was insufficient of time to fix this issue.**
+
 This project uses [Forest train](https://www.kaggle.com/competitions/forest-cover-type-prediction) dataset.
 
 ![MLFlow experiments example](https://raw.githubusercontent.com/wervlad/9_evaluation_selection/main/img/experiments.png?token=GHSAT0AAAAAABRJ66VVHKTA72M5DTZMDNSAYTXTHOA)
