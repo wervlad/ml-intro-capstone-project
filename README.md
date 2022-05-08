@@ -4,7 +4,7 @@ Homework for RS School Machine Learning course.
 
 This project uses [Forest train](https://www.kaggle.com/competitions/forest-cover-type-prediction) dataset.
 
-![MLFlow experiments example](https://raw.githubusercontent.com/wervlad/9_evaluation_selection/main/img/experiments.png?token=GHSAT0AAAAAABRJ66VVHKTA72M5DTZMDNSAYTXTHOA)
+![MLFlow experiments example](https://github.com/wervlad/9_evaluation_selection/blob/main/img/experiments.png)
 
 ## Usage
 This package allows you to train model for predicting forest cover type.
