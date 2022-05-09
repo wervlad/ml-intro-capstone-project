@@ -4,8 +4,6 @@ Homework for RS School Machine Learning course.
 
 This project uses [Forest train](https://www.kaggle.com/competitions/forest-cover-type-prediction) dataset.
 
-![MLFlow experiments example](https://github.com/wervlad/9_evaluation_selection/blob/main/img/experiments.png)
-
 ## Usage
 This package allows you to train model for predicting forest cover type.
 1. Clone this repository to your machine.
@@ -47,6 +45,10 @@ poetry run train logreg --help
 ```sh
 poetry run mlflow ui
 ```
+You can then visit http://localhost:5000 in your browser and investigate results of all experiments. Typical log will look like this:
+
+![MLFlow experiments example](https://github.com/wervlad/9_evaluation_selection/blob/main/img/experiments.png)
+
 7. For better undestanding of dataset automatic EDA report can be generated:
 ```sh
 poetry run profiling_report -i <path to csv with data> -o <path to save report>
