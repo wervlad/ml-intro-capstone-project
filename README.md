@@ -17,15 +17,39 @@ poetry install --no-dev
 ```
 5. Run train with the following command:
 ```sh
-poetry run train -d <path to csv with data> -s <path to save trained model>
+poetry run train -d <path to csv with data> -s <path to save trained model> <ml model>
 ```
+E.g. if you saved dataset to data/train.csv, the following command will perform hyperparameters search for KNN algorithm and the save best model to data/model.joblib:
+```sh
+poetry run train knn
+```
+Currently only KNN and Linear Regression algorithm are supported.
+
+If you'd like to specify hyperparams manually, use ``manual`` value in ``--search`` argument. E.g. the following command will standardize data and then train and save Logistic Regression model with regularization strenght (C) 10, maximum number of iterations 1000:
+```sh
+run train --use-scaler True --transform None --search manual logreg --max-iter=1000 --c 10
+```
+
 You can configure additional options (such as hyperparameters) in the CLI. To get a full list of them, use help:
 ```sh
 poetry run train --help
 ```
+To get supported hyperparameters run:
+```sh
+poetry run train <ml model> --help
+```
+E.g.
+```sh
+poetry run train knn --help
+poetry run train logreg --help
+```
 6. Run MLflow UI to see the information about experiments you conducted:
 ```sh
 poetry run mlflow ui
+```
+7. For better undestanding of dataset automatic EDA report can be generated:
+```sh
+poetry run profiling_report -i <path to csv with data> -o <path to save report>
 ```
 
 ## Development
