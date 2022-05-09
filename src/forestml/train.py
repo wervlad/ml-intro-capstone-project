@@ -21,7 +21,8 @@ from .data import get_dataset, DATASET_PATH
 import warnings
 
 # Ignore tSNE FutureWarnings
-warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 
 @click.group()
 @click.pass_context
@@ -83,6 +84,7 @@ def train(
     ctx.obj["transform"] = transform
     ctx.obj["search"] = search
 
+
 @train.command()
 @click.pass_context
 @click.option("--max-iter", default=1000, show_default=True, type=int)
@@ -109,6 +111,7 @@ def logreg(
             create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
         )
 
+
 @train.command()
 @click.pass_context
 @click.option("--n-neighbors", default=5, show_default=True, type=int)
@@ -116,8 +119,17 @@ def logreg(
     "--metric",
     default="minkowski",
     show_default=True,
-    type=click.Choice(["euclidean", "manhattan", "chebyshev", "minkowski",
-                       "wminkowski", "seuclidean", "mahalanobis"]),
+    type=click.Choice(
+        [
+            "euclidean",
+            "manhattan",
+            "chebyshev",
+            "minkowski",
+            "wminkowski",
+            "seuclidean",
+            "mahalanobis",
+        ]
+    ),
 )
 @click.option(
     "--weights",
@@ -129,7 +141,7 @@ def knn(
     ctx: click.core.Context,
     n_neighbors: int,
     metric: str,
-    weights:str,
+    weights: str,
 ) -> None:
     ctx.obj["model"] = "KNN"
     ctx.obj["n_neighbors"] = n_neighbors
@@ -149,14 +161,14 @@ def knn(
             create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
         )
 
-def create_pipeline(
-    use_scaler: bool, model: BaseEstimator
-) -> Pipeline:
+
+def create_pipeline(use_scaler: bool, model: BaseEstimator) -> Pipeline:
     pipeline_steps = []
     if use_scaler:
         pipeline_steps.append(("scaler", StandardScaler()))
     pipeline_steps.append(("classifier", model))
     return Pipeline(steps=pipeline_steps)
+
 
 def run_experiment(
     ctx: click.core.Context,
@@ -171,23 +183,22 @@ def run_experiment(
         y = ctx.obj["y"].to_numpy()
         if ctx.obj["transform"] == "tsne":
             X = TSNE(
-                n_components=2,
-                learning_rate="auto",
-                init="pca",
-                random_state=42
+                n_components=2, learning_rate="auto", init="pca", random_state=42
             ).fit_transform(X)
         elif ctx.obj["transform"] == "lda":
             X = LinearDiscriminantAnalysis(
                 n_components=2,
                 priors=None,
-                shrinkage='auto',
-                solver='eigen',
+                shrinkage="auto",
+                solver="eigen",
                 store_covariance=False,
-                tol=0.0001
+                tol=0.0001,
             ).fit_transform(X, y)
-        kf = KFold(n_splits=ctx.obj["n_splits"],
-                   shuffle=True,
-                   random_state=ctx.obj["random_state"])
+        kf = KFold(
+            n_splits=ctx.obj["n_splits"],
+            shuffle=True,
+            random_state=ctx.obj["random_state"],
+        )
         # use KFold cross-validator to calculate metrics
         for train_indices, test_indices in kf.split(X, y):
             X_train = X[train_indices]
@@ -226,6 +237,7 @@ def run_experiment(
         dump(pipeline, ctx.obj["save_model_path"])
         click.echo(f"Model is saved to {ctx.obj['save_model_path']}.")
 
+
 def run_experiment_random_grid(
     ctx: click.core.Context,
     pipeline: Pipeline,
@@ -240,19 +252,16 @@ def run_experiment_random_grid(
         y = ctx.obj["y"].to_numpy()
         if ctx.obj["transform"] == "tsne":
             X = TSNE(
-                n_components=2,
-                learning_rate="auto",
-                init="pca",
-                random_state=42
+                n_components=2, learning_rate="auto", init="pca", random_state=42
             ).fit_transform(X)
         elif ctx.obj["transform"] == "lda":
             X = LinearDiscriminantAnalysis(
                 n_components=2,
                 priors=None,
-                shrinkage='auto',
-                solver='eigen',
+                shrinkage="auto",
+                solver="eigen",
                 store_covariance=False,
-                tol=0.0001
+                tol=0.0001,
             ).fit_transform(X, y)
         cv_outer = KFold(
             n_splits=10, shuffle=True, random_state=ctx.obj["random_state"]
@@ -260,7 +269,17 @@ def run_experiment_random_grid(
         if ctx.obj["model"] == "LogReg":
             PARAMS = {
                 "classifier__max_iter": [1000],
-                "classifier__C": [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 1000, 10000],
+                "classifier__C": [
+                    0.00001,
+                    0.0001,
+                    0.001,
+                    0.01,
+                    0.1,
+                    1,
+                    10,
+                    1000,
+                    10000,
+                ],
             }
         elif ctx.obj["model"] == "KNN":
             PARAMS = {
@@ -271,7 +290,7 @@ def run_experiment_random_grid(
                     "manhattan",
                     "chebyshev",
                     "minkowski",
-                ]
+                ],
             }
         outer_results = list()
         click.echo("Running Nested CV with RandomSearch in inner loop")
@@ -318,8 +337,12 @@ def run_experiment_random_grid(
         mlflow.log_metric("precision", np.mean(precision_list))
         mlflow.log_metric("recall", np.mean(recall_list))
         mlflow.log_metric("f1", np.mean(f1_list))
-        click.echo(f"Accuracy: {np.mean(accuracy_list):.3f} ({np.std(accuracy_list):.3f})")
-        click.echo(f"Precision: {np.mean(precision_list):.3f} ({np.std(precision_list):.3f})")
+        click.echo(
+            f"Accuracy: {np.mean(accuracy_list):.3f} ({np.std(accuracy_list):.3f})"
+        )
+        click.echo(
+            f"Precision: {np.mean(precision_list):.3f} ({np.std(precision_list):.3f})"
+        )
         click.echo(f"Recall: {np.mean(recall_list):.3f} ({np.std(recall_list):.3f})")
         click.echo(f"F1: {np.mean(f1_list):.3f} ({np.std(f1_list):.3f})")
         # finally fit best model on whole dataset and save it
