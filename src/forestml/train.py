@@ -85,7 +85,7 @@ def train(
 
 @train.command()
 @click.pass_context
-@click.option("--max-iter", default=100, show_default=True, type=int)
+@click.option("--max-iter", default=1000, show_default=True, type=int)
 @click.option("--c", default=1.0, show_default=True, type=float)
 def logreg(
     ctx: click.core.Context,
