@@ -49,6 +49,8 @@ You can then visit http://localhost:5000 in your browser and investigate results
 
 ![MLFlow experiments example](https://github.com/wervlad/9_evaluation_selection/blob/main/img/experiments.png)
 
+Note: I highlighted the one with the best score with red frame manually. You'll not see it in your browser.
+
 7. For better undestanding of dataset automatic EDA report can be generated:
 ```sh
 poetry run profiling_report -i <path to csv with data> -o <path to save report>
