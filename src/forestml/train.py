@@ -60,7 +60,7 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 )
 @click.option(
     "--search",
-    default="manual",
+    default="random",
     show_default=True,
     type=click.Choice(["manual", "random"]),
 )
