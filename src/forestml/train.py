@@ -292,7 +292,6 @@ def run_experiment_random_grid(
                     "minkowski",
                 ],
             }
-        outer_results = list()
         click.echo("Running Nested CV with RandomSearch in inner loop")
         for train_indices, test_indices in cv_outer.split(X):
             X_train, X_test = X[train_indices, :], X[test_indices, :]

@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Union
 
 import click
 import pandas as pd
@@ -16,7 +16,7 @@ def get_dataset(
     csv_path: Path,
     return_X_y: bool = True,
     drop_columns: bool = True,
-) -> Tuple[pd.DataFrame, pd.Series]:
+) -> Union[pd.DataFrame, Tuple[pd.DataFrame, pd.Series]]:
     dataset = pd.read_csv(csv_path)
     click.echo(f"Dataset shape: {dataset.shape}.")
     if drop_columns:
