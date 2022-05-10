@@ -1,5 +1,8 @@
 SOURCES = $(wildcard *.py) $(wildcard */*.py) $(wildcard */*/*.py)
 
+tests:
+	nox -rs tests
+
 run_mlflow_ui:
 	poetry run mlflow ui
 
@@ -20,5 +23,5 @@ sync_with_git:
 clean:
 	rm -rf tags include_tags __pycache__ */__pycache__ */*/__pycache__
 
-.PHONY: clean include_tags tags
+.PHONY: clean include_tags tags tests
 
