@@ -2,7 +2,6 @@ import click
 import numpy as np
 import mlflow
 import mlflow.sklearn
-import pandas as pd
 from math import inf
 from joblib import dump
 from pathlib import Path
@@ -16,7 +15,6 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from typing import Tuple
 from .data import get_dataset, DATASET_PATH, MODEL_PATH
 import warnings
 
@@ -200,7 +198,10 @@ def run_experiment(
         y = ctx.obj["y"].to_numpy()
         if ctx.obj["transform"] == "tsne":
             X = TSNE(
-                n_components=2, learning_rate="auto", init="pca", random_state=42
+                n_components=2,
+                learning_rate="auto",
+                init="pca",
+                random_state=42,
             ).fit_transform(X)
         elif ctx.obj["transform"] == "lda":
             X = LinearDiscriminantAnalysis(
@@ -246,10 +247,10 @@ def run_experiment(
         mlflow.log_param("search", "KFold (manual)")
         mlflow.log_param("use_scaler", ctx.obj["use_scaler"])
         mlflow.log_param("transform", ctx.obj["transform"])
-        mlflow.log_metric("accuracy", sum(accuracy_list) / len(accuracy_list))
-        mlflow.log_metric("precision", sum(precision_list) / len(precision_list))
-        mlflow.log_metric("recall", sum(recall_list) / len(recall_list))
-        mlflow.log_metric("f1", sum(f1_list) / len(f1_list))
+        mlflow.log_metric("accuracy", np.mean(accuracy_list))
+        mlflow.log_metric("precision", np.mean(precision_list))
+        mlflow.log_metric("recall", np.mean(recall_list))
+        mlflow.log_metric("f1", np.mean(f1_list))
         click.echo(f"Accuracy: {accuracy}.")
         click.echo(f"Precision: {precision}.")
         click.echo(f"Recall: {recall}.")
@@ -272,7 +273,10 @@ def run_experiment_random_grid(
         y = ctx.obj["y"].to_numpy()
         if ctx.obj["transform"] == "tsne":
             X = TSNE(
-                n_components=2, learning_rate="auto", init="pca", random_state=42
+                n_components=2,
+                learning_rate="auto",
+                init="pca",
+                random_state=42,
             ).fit_transform(X)
         elif ctx.obj["transform"] == "lda":
             X = LinearDiscriminantAnalysis(
@@ -303,7 +307,12 @@ def run_experiment_random_grid(
             }
         elif ctx.obj["model"] == "KNN":
             PARAMS = {
-                "classifier__n_neighbors": np.logspace(0, 3, num=100, dtype=int),
+                "classifier__n_neighbors": np.logspace(
+                    0,
+                    3,
+                    num=100,
+                    dtype=int,
+                ),
                 "classifier__weights": ["uniform", "distance"],
                 "classifier__metric": [
                     "euclidean",
@@ -346,12 +355,21 @@ def run_experiment_random_grid(
         best_of_the_best = best_params_list[np.array(accuracy_list).argmax()]
         click.echo(f"Best params: {best_of_the_best}")
         if ctx.obj["model"] == "LogReg":
-            mlflow.log_param("max_iter", best_of_the_best["classifier__max_iter"])
+            mlflow.log_param(
+                "max_iter",
+                best_of_the_best["classifier__max_iter"],
+            )
             mlflow.log_param("logreg_c", best_of_the_best["classifier__C"])
         elif ctx.obj["model"] == "KNN":
-            mlflow.log_param("n_neighbors", best_of_the_best["classifier__n_neighbors"])
+            mlflow.log_param(
+                "n_neighbors",
+                best_of_the_best["classifier__n_neighbors"],
+            )
             mlflow.log_param("metric", best_of_the_best["classifier__metric"])
-            mlflow.log_param("weights", best_of_the_best["classifier__weights"])
+            mlflow.log_param(
+                "weights",
+                best_of_the_best["classifier__weights"],
+            )
         mlflow.log_param("search", "NestedCV (random)")
         mlflow.log_param("use_scaler", ctx.obj["use_scaler"])
         mlflow.log_param("transform", ctx.obj["transform"])
@@ -360,13 +378,18 @@ def run_experiment_random_grid(
         mlflow.log_metric("recall", np.mean(recall_list))
         mlflow.log_metric("f1", np.mean(f1_list))
         click.echo(
-            f"Accuracy: {np.mean(accuracy_list):.3f} ({np.std(accuracy_list):.3f})"
+            f"Accuracy: {np.mean(accuracy_list):.3f} "
+            f"(std: {np.std(accuracy_list):.3f})"
         )
         click.echo(
-            f"Precision: {np.mean(precision_list):.3f} ({np.std(precision_list):.3f})"
+            f"Precision: {np.mean(precision_list):.3f} "
+            f"(std: {np.std(precision_list):.3f})"
         )
-        click.echo(f"Recall: {np.mean(recall_list):.3f} ({np.std(recall_list):.3f})")
-        click.echo(f"F1: {np.mean(f1_list):.3f} ({np.std(f1_list):.3f})")
+        click.echo(
+            f"Recall: {np.mean(recall_list):.3f} "
+            f"(std: {np.std(recall_list):.3f})"
+        )
+        click.echo(f"F1: {np.mean(f1_list):.3f} (std: {np.std(f1_list):.3f})")
         # finally fit best model on whole dataset and save it
         pipeline.set_params(**best_of_the_best)
         pipeline.fit(X, y)

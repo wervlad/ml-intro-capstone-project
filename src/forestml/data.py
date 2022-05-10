@@ -1,4 +1,3 @@
-import logging
 from pathlib import Path
 from typing import Tuple, Union
 
@@ -47,6 +46,7 @@ def get_dataset(
 )
 def generate_profiling_report(csv_path: Path, report_path: Path) -> None:
     profile = pandas_profiling.ProfileReport(
-        get_dataset(csv_path, return_X_y=False, drop_columns=False), minimal=False
+        get_dataset(csv_path, return_X_y=False, drop_columns=False),
+        minimal=False,
     )
     profile.to_file(report_path)
