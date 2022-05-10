@@ -82,6 +82,7 @@ def test_generate_profiling_report_generates_report(runner: CliRunner) -> None:
         path = Path(data.DATASET_PATH)
         # generate empty dataset to speedup profiling
         generate_test_dataset(path, n_samples=0, n_features=N_FEATURES)
+        assert Path(data.REPORT_PATH).is_file() == False
         ret = runner.invoke(data.generate_profiling_report)
         assert ret.exit_code == 0
-        assert path.is_file() == True
+        assert Path(data.REPORT_PATH).is_file() == True
