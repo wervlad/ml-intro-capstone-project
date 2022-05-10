@@ -17,7 +17,7 @@ from sklearn.model_selection import KFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from typing import Tuple
-from .data import get_dataset, DATASET_PATH
+from .data import get_dataset, DATASET_PATH, MODEL_PATH
 import warnings
 
 # Ignore tSNE FutureWarnings
@@ -36,7 +36,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 @click.option(
     "-s",
     "--save-model-path",
-    default="data/model.joblib",
+    default=MODEL_PATH,
     show_default=True,
     type=click.Path(dir_okay=False, writable=True, path_type=Path),
 )

@@ -8,6 +8,7 @@ import pandas_profiling
 
 DATASET_PATH = "data/train.csv"
 REPORT_PATH = "data/report.html"
+MODEL_PATH = "data/model.joblib"
 TARGET = "Cover_Type"
 DROP = ["Soil_Type7", "Soil_Type15"]
 
