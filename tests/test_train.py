@@ -35,14 +35,35 @@ def test_train_fails_with_invalid_random_state(runner: CliRunner) -> None:
     assert ret.exit_code == 2
     assert "Invalid value for '--random-state'" in ret.output
 
-def test_train_fails_with_invalid_max_iter_value(runner: CliRunner) -> None:
-    """It fails when passing invalid maximum number of iterations."""
+def test_train_fails_with_invalid_logreg_max_iter_value(runner: CliRunner) -> None:
+    """
+    It fails when passing to LogisticRegression invalid maximum number of
+    iterations.
+    """
     ret = runner.invoke(train, ["--search", "manual", "logreg", "--max-iter", -1])
     assert ret.exit_code == 2
     assert "Invalid value for '--max-iter'" in ret.output
 
-def test_train_fails_with_invalid_C_value(runner: CliRunner) -> None:
-    """It fails when passing invalid C value."""
+def test_train_fails_with_invalid_logreg_C_value(runner: CliRunner) -> None:
+    """It fails when passing to LogisticRegression invalid C value."""
     ret = runner.invoke(train, ["--search", "manual", "logreg", "--c", 0])
     assert ret.exit_code == 2
     assert "Invalid value for '--c'" in ret.output
+
+def test_train_fails_with_invalid_knn_n_neighbors_value(runner: CliRunner) -> None:
+    """It fails when passing to KNN invalid number of neighbors."""
+    ret = runner.invoke(train, ["--search", "manual", "knn", "--n-neighbors", 0])
+    assert ret.exit_code == 2
+    assert "Invalid value for '--n-neighbors'" in ret.output
+
+def test_train_fails_with_invalid_knn_metric_value(runner: CliRunner) -> None:
+    """It fails when passing to KNN invalid metric value."""
+    ret = runner.invoke(train, ["--search", "manual", "knn", "--metric", "foo"])
+    assert ret.exit_code == 2
+    assert "Invalid value for '--metric'" in ret.output
+
+def test_train_fails_with_invalid_knn_weights_value(runner: CliRunner) -> None:
+    """It fails when passing to KNN invalid weights value."""
+    ret = runner.invoke(train, ["--search", "manual", "knn", "--weights", "foo"])
+    assert ret.exit_code == 2
+    assert "Invalid value for '--weights'" in ret.output
