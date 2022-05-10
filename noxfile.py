@@ -5,7 +5,7 @@ from nox.sessions import Session
 from typing import Any
 
 nox.options.sessions = "black", "flake8", "mypy", "tests"
-locations = "src", "noxfile.py"
+locations = "src", "tests", "noxfile.py"
 
 
 def install_with_constraints(
@@ -37,7 +37,7 @@ def black(session: Session) -> None:
     """Run black code formatter."""
     args = session.posargs or locations
     install_with_constraints(session, "black")
-    session.run("black", "--line-length", "80", *args)
+    session.run("black", "--line-length", "79", *args)
 
 
 @nox.session(python="3.9")
