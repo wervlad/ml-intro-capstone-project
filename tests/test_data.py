@@ -18,13 +18,14 @@ def generate_test_dataset(
     path: Path = Path(data.DATASET_PATH),
     n_samples: int = N_SAMPLES,
     n_features: int = N_FEATURES,
+    random_state=42,
 ) -> None:
     """Helper function to generate dataset for tests."""
     # generate data randomly
     X, y = make_classification(
         n_samples=n_samples,
         n_features=n_features,
-        random_state=42,
+        random_state=random_state,
         n_informative=45,
         n_redundant=10,
         n_classes=7,
