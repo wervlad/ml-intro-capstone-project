@@ -1,6 +1,9 @@
 from click.testing import CliRunner
+from pathlib import Path
 import pytest
+import forestml.data as data
 from forestml.train import train
+from .test_data import generate_test_dataset
 
 
 @pytest.fixture
@@ -67,3 +70,37 @@ def test_train_fails_with_invalid_knn_weights_value(runner: CliRunner) -> None:
     ret = runner.invoke(train, ["--search", "manual", "knn", "--weights", "foo"])
     assert ret.exit_code == 2
     assert "Invalid value for '--weights'" in ret.output
+
+def test_train_manual_search_generates_model_successfully(runner: CliRunner) -> None:
+    with runner.isolated_filesystem():
+        generate_test_dataset()
+        assert Path(data.MODEL_PATH).is_file() == False
+        ret = runner.invoke(
+            train,
+            [
+                "--use-scaler", True,
+                "--transform", None,
+                "--search", "manual",
+                "logreg",
+                "--max-iter", 1000,
+                "--c", 0.001,
+            ]
+        )
+        assert ret.exit_code == 0
+        assert Path(data.MODEL_PATH).is_file() == True
+
+def test_train_random_search_generates_model_successfully(runner: CliRunner) -> None:
+    with runner.isolated_filesystem():
+        generate_test_dataset()
+        assert Path(data.MODEL_PATH).is_file() == False
+        ret = runner.invoke(
+            train,
+            [
+                "--use-scaler", True,
+                "--transform", None,
+                "--search", "random",
+                "logreg",
+            ]
+        )
+        assert ret.exit_code == 0
+        assert Path(data.MODEL_PATH).is_file() == True

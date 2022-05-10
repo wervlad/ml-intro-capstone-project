@@ -228,7 +228,10 @@ def run_experiment(
             pipeline.fit(X_train, y_train)
             accuracy = accuracy_score(y_val, pipeline.predict(X_val))
             precision, recall, f1, _ = precision_recall_fscore_support(
-                y_val, pipeline.predict(X_val), average="weighted"
+                y_val,
+                pipeline.predict(X_val),
+                average="weighted",
+                zero_division=0,
             )
             accuracy_list.append(accuracy)
             precision_list.append(precision)
@@ -331,7 +334,10 @@ def run_experiment_random_grid(
             best_model = random_search.fit(X_train, y_train)
             accuracy = accuracy_score(y_test, best_model.predict(X_test))
             precision, recall, f1, _ = precision_recall_fscore_support(
-                y_test, best_model.predict(X_test), average="weighted"
+                y_test,
+                best_model.predict(X_test),
+                average="weighted",
+                zero_division=0,
             )
             click.echo(f"{accuracy}, {best_model.best_params_}")
             accuracy_list.append(accuracy)
