@@ -14,7 +14,11 @@ def runner() -> CliRunner:
     """Fixture providing click runner."""
     return CliRunner()
 
-def generate_test_dataset(path: Path, n_samples: int, n_features: int) -> None:
+def generate_test_dataset(
+    path: Path = Path(data.DATASET_PATH),
+    n_samples: int = N_SAMPLES,
+    n_features: int = N_FEATURES,
+) -> None:
     """Helper function to generate dataset for tests."""
     # generate data randomly
     X, y = make_classification(
