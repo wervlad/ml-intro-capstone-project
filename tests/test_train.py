@@ -1,5 +1,7 @@
 from click.testing import CliRunner
+import joblib
 from pathlib import Path
+import numpy as np
 import pytest
 import forestml.data as data
 from forestml.train import train
@@ -74,7 +76,8 @@ def test_train_fails_with_invalid_knn_weights_value(runner: CliRunner) -> None:
 def test_train_manual_search_generates_model_successfully(runner: CliRunner) -> None:
     with runner.isolated_filesystem():
         generate_test_dataset()
-        assert Path(data.MODEL_PATH).is_file() == False
+        model_path = Path(data.MODEL_PATH)
+        assert model_path.is_file() == False
         ret = runner.invoke(
             train,
             [
@@ -87,12 +90,14 @@ def test_train_manual_search_generates_model_successfully(runner: CliRunner) -> 
             ]
         )
         assert ret.exit_code == 0
-        assert Path(data.MODEL_PATH).is_file() == True
+        assert model_path.is_file() == True
+        assert is_saved_model_correct(model_path) == True
 
 def test_train_random_search_generates_model_successfully(runner: CliRunner) -> None:
     with runner.isolated_filesystem():
         generate_test_dataset()
-        assert Path(data.MODEL_PATH).is_file() == False
+        model_path = Path(data.MODEL_PATH)
+        assert model_path.is_file() == False
         ret = runner.invoke(
             train,
             [
@@ -103,4 +108,12 @@ def test_train_random_search_generates_model_successfully(runner: CliRunner) -> 
             ]
         )
         assert ret.exit_code == 0
-        assert Path(data.MODEL_PATH).is_file() == True
+        assert model_path.is_file() == True
+        assert is_saved_model_correct(model_path) == True
+
+def is_saved_model_correct(path: Path):
+    X, _ = data.get_dataset(data.DATASET_PATH)
+    X = X.to_numpy()
+    obj = joblib.load(path)
+    y_pred = obj.predict(X)
+    return np.logical_and(y_pred >= 0, y_pred <= 6).all()
