@@ -40,7 +40,12 @@ warnings.filterwarnings("ignore", category=FutureWarning)
     show_default=True,
     type=click.Path(dir_okay=False, writable=True, path_type=Path),
 )
-@click.option("--random-state", default=42, show_default=True, type=int)
+@click.option(
+    "--random-state",
+    default=42,
+    show_default=True,
+    type=click.IntRange(0, 2**32 - 1),
+)
 @click.option(
     "--n-splits",
     default=5,
