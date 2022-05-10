@@ -101,7 +101,7 @@ def test_train_manual_search_generates_model_successfully(
     with runner.isolated_filesystem():
         generate_test_dataset()
         model_path = Path(data.MODEL_PATH)
-        assert model_path.is_file() is False
+        assert not model_path.is_file()
         ret = runner.invoke(
             train,
             [
@@ -119,8 +119,8 @@ def test_train_manual_search_generates_model_successfully(
             ],
         )
         assert ret.exit_code == 0
-        assert model_path.is_file() is True
-        assert is_saved_model_correct(model_path) is True
+        assert model_path.is_file()
+        assert is_saved_model_correct(model_path)
 
 
 def test_train_random_search_generates_model_successfully(
@@ -129,7 +129,7 @@ def test_train_random_search_generates_model_successfully(
     with runner.isolated_filesystem():
         generate_test_dataset()
         model_path = Path(data.MODEL_PATH)
-        assert model_path.is_file() is False
+        assert not model_path.is_file()
         ret = runner.invoke(
             train,
             [
@@ -143,8 +143,8 @@ def test_train_random_search_generates_model_successfully(
             ],
         )
         assert ret.exit_code == 0
-        assert model_path.is_file() is True
-        assert is_saved_model_correct(model_path) is True
+        assert model_path.is_file()
+        assert is_saved_model_correct(model_path)
 
 
 def is_saved_model_correct(path: Path):
