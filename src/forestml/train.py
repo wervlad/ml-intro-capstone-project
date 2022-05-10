@@ -92,8 +92,18 @@ def train(
 
 @train.command()
 @click.pass_context
-@click.option("--max-iter", default=1000, show_default=True, type=int)
-@click.option("--c", default=1.0, show_default=True, type=float)
+@click.option(
+    "--max-iter",
+    default=1000,
+    show_default=True,
+    type=click.IntRange(0, inf)
+)
+@click.option(
+    "--c",
+    default=1.0,
+    show_default=True,
+    type=click.FloatRange(0, inf, min_open=True),
+)
 def logreg(
     ctx: click.core.Context,
     max_iter: int,
