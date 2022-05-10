@@ -15,6 +15,7 @@ def runner() -> CliRunner:
     return CliRunner()
 
 def generate_test_dataset(path: Path, n_samples: int, n_features: int) -> None:
+    """Helper function to generate dataset for tests."""
     # generate data randomly
     X, y = make_classification(
         n_samples=n_samples,
@@ -35,6 +36,7 @@ def generate_test_dataset(path: Path, n_samples: int, n_features: int) -> None:
     pd.DataFrame(data=data, columns=columns).set_index("Id").to_csv(path)
 
 def test_get_dataset_fails_with_invalid_path(runner: CliRunner) -> None:
+    """It fails when trying to get dataset from unexistent file."""
     with runner.isolated_filesystem():
         with pytest.raises(FileNotFoundError):
             data.get_dataset("invalid_path/invalid_dataset.css")
@@ -42,6 +44,7 @@ def test_get_dataset_fails_with_invalid_path(runner: CliRunner) -> None:
 def test_get_dataset_with_return_X_y_returns_correct_shape(
     runner: CliRunner
 ) -> None:
+    """Checks the shape of loaded dataset is correct with return_X_y=True."""
     with runner.isolated_filesystem():
         path = Path(data.DATASET_PATH)
         generate_test_dataset(path, n_samples=N_SAMPLES, n_features=N_FEATURES)
@@ -53,6 +56,7 @@ def test_get_dataset_with_return_X_y_returns_correct_shape(
 def test_get_dataset_wo_return_X_y_returns_correct_shape(
     runner: CliRunner
 ) -> None:
+    """Checks the shape of loaded dataset is correct with return_X_y=False."""
     with runner.isolated_filesystem():
         path = Path(data.DATASET_PATH)
         generate_test_dataset(path, n_samples=N_SAMPLES, n_features=N_FEATURES)
@@ -62,6 +66,10 @@ def test_get_dataset_wo_return_X_y_returns_correct_shape(
 def test_get_dataset_with_drop_columns_returns_correct_shape(
     runner: CliRunner
 ) -> None:
+    """
+    Checks the shape of loaded dataset is correct after droping constant
+    columns.
+    """
     with runner.isolated_filesystem():
         path = Path(data.DATASET_PATH)
         generate_test_dataset(path, n_samples=N_SAMPLES, n_features=N_FEATURES)
@@ -69,6 +77,7 @@ def test_get_dataset_with_drop_columns_returns_correct_shape(
         assert dataset.shape == (N_SAMPLES, N_FEATURES + 1 - len(data.DROP))
 
 def test_generate_profiling_report_generates_report(runner: CliRunner) -> None:
+    """Checks the profile report is generated successfully."""
     with runner.isolated_filesystem():
         path = Path(data.DATASET_PATH)
         # generate empty dataset to speedup profiling
