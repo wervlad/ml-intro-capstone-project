@@ -129,7 +129,12 @@ def logreg(
 
 @train.command()
 @click.pass_context
-@click.option("--n-neighbors", default=5, show_default=True, type=int)
+@click.option(
+    "--n-neighbors",
+    default=5,
+    show_default=True,
+    type=click.IntRange(0, inf, min_open=True),
+)
 @click.option(
     "--metric",
     default="minkowski",
