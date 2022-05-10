@@ -77,3 +77,6 @@ Format your code with [black](https://github.com/psf/black) by using either nox 
 nox -[r]s black
 poetry run black src tests noxfile.py
 ```
+Currently all tests are passing.
+
+![tests passed successfully](https://github.com/wervlad/9_evaluation_selection/blob/main/img/tests.png)
