@@ -147,9 +147,9 @@ def test_train_random_search_generates_model_successfully(
         assert is_saved_model_correct(model_path)
 
 
-def is_saved_model_correct(path: Path):
-    X, _ = data.get_dataset(data.DATASET_PATH)
+def is_saved_model_correct(path: Path) -> bool:
+    X, _ = data.get_dataset(Path(data.DATASET_PATH))
     X = X.to_numpy()
     obj = joblib.load(path)
     y_pred = obj.predict(X)
-    return np.logical_and(y_pred >= 0, y_pred <= 6).all()
+    return bool(np.logical_and(y_pred >= 0, y_pred <= 6).all())

@@ -20,7 +20,7 @@ def generate_test_dataset(
     path: Path = Path(data.DATASET_PATH),
     n_samples: int = N_SAMPLES,
     n_features: int = N_FEATURES,
-    random_state=42,
+    random_state: int = 42,
 ) -> None:
     """Helper function to generate dataset for tests."""
     # generate data randomly
@@ -47,7 +47,7 @@ def test_get_dataset_fails_with_invalid_path(runner: CliRunner) -> None:
     """It fails when trying to get dataset from unexistent file."""
     with runner.isolated_filesystem():
         with pytest.raises(FileNotFoundError):
-            data.get_dataset("invalid_path/invalid_dataset.css")
+            data.get_dataset(Path("invalid_path/invalid_dataset.css"))
 
 
 def test_get_dataset_with_return_X_y_returns_correct_shape(
