@@ -9,10 +9,12 @@ import forestml.data as data
 N_SAMPLES = 100
 N_FEATURES = 55
 
+
 @pytest.fixture
 def runner() -> CliRunner:
     """Fixture providing click runner."""
     return CliRunner()
+
 
 def generate_test_dataset(
     path: Path = Path(data.DATASET_PATH),
@@ -31,7 +33,7 @@ def generate_test_dataset(
         n_classes=7,
     )
     data = np.concatenate((X, y.reshape(1, -1).T), axis=1)
-    columns = ['']*56
+    columns = [""] * 56
     columns[-1] = "Cover_Type"
     columns[0] = "Id"
     for i in range(15, 55):
@@ -40,14 +42,16 @@ def generate_test_dataset(
     path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(data=data, columns=columns).set_index("Id").to_csv(path)
 
+
 def test_get_dataset_fails_with_invalid_path(runner: CliRunner) -> None:
     """It fails when trying to get dataset from unexistent file."""
     with runner.isolated_filesystem():
         with pytest.raises(FileNotFoundError):
             data.get_dataset("invalid_path/invalid_dataset.css")
 
+
 def test_get_dataset_with_return_X_y_returns_correct_shape(
-    runner: CliRunner
+    runner: CliRunner,
 ) -> None:
     """Checks the shape of loaded dataset is correct with return_X_y=True."""
     with runner.isolated_filesystem():
@@ -58,8 +62,9 @@ def test_get_dataset_with_return_X_y_returns_correct_shape(
         assert dataset[0].shape == (N_SAMPLES, N_FEATURES)
         assert dataset[1].shape == (N_SAMPLES,)
 
+
 def test_get_dataset_wo_return_X_y_returns_correct_shape(
-    runner: CliRunner
+    runner: CliRunner,
 ) -> None:
     """Checks the shape of loaded dataset is correct with return_X_y=False."""
     with runner.isolated_filesystem():
@@ -68,8 +73,9 @@ def test_get_dataset_wo_return_X_y_returns_correct_shape(
         dataset = data.get_dataset(path, return_X_y=False, drop_columns=False)
         assert dataset.shape == (N_SAMPLES, N_FEATURES + 1)
 
+
 def test_get_dataset_with_drop_columns_returns_correct_shape(
-    runner: CliRunner
+    runner: CliRunner,
 ) -> None:
     """
     Checks the shape of loaded dataset is correct after droping constant
@@ -81,13 +87,14 @@ def test_get_dataset_with_drop_columns_returns_correct_shape(
         dataset = data.get_dataset(path, return_X_y=False, drop_columns=True)
         assert dataset.shape == (N_SAMPLES, N_FEATURES + 1 - len(data.DROP))
 
+
 def test_generate_profiling_report_generates_report(runner: CliRunner) -> None:
     """Checks the profile report is generated successfully."""
     with runner.isolated_filesystem():
         path = Path(data.DATASET_PATH)
         # generate empty dataset to speedup profiling
         generate_test_dataset(path, n_samples=0, n_features=N_FEATURES)
-        assert Path(data.REPORT_PATH).is_file() == False
+        assert Path(data.REPORT_PATH).is_file() is False
         ret = runner.invoke(data.generate_profiling_report)
         assert ret.exit_code == 0
-        assert Path(data.REPORT_PATH).is_file() == True
+        assert Path(data.REPORT_PATH).is_file() is True
