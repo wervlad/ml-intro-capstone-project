@@ -93,10 +93,7 @@ def train(
 @train.command()
 @click.pass_context
 @click.option(
-    "--max-iter",
-    default=1000,
-    show_default=True,
-    type=click.IntRange(0, inf)
+    "--max-iter", default=1000, show_default=True, type=click.IntRange(0, inf)
 )
 @click.option(
     "--c",
