@@ -34,3 +34,15 @@ def test_train_fails_with_invalid_random_state(runner: CliRunner) -> None:
     ret = runner.invoke(train, ["--random-state", 2**32])
     assert ret.exit_code == 2
     assert "Invalid value for '--random-state'" in ret.output
+
+def test_train_fails_with_invalid_max_iter_value(runner: CliRunner) -> None:
+    """It fails when passing invalid maximum number of iterations."""
+    ret = runner.invoke(train, ["--search", "manual", "logreg", "--max-iter", -1])
+    assert ret.exit_code == 2
+    assert "Invalid value for '--max-iter'" in ret.output
+
+def test_train_fails_with_invalid_C_value(runner: CliRunner) -> None:
+    """It fails when passing invalid C value."""
+    ret = runner.invoke(train, ["--search", "manual", "logreg", "--c", 0])
+    assert ret.exit_code == 2
+    assert "Invalid value for '--c'" in ret.output
