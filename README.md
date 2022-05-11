@@ -10,6 +10,9 @@
 <a href="https://github.com/wervlad/9_evaluation_selection/actions/workflows/mypy.yml">
     <img alt="mypy" src="https://github.com/wervlad/9_evaluation_selection/actions/workflows/mypy.yml/badge.svg">
 </a>
+<a href="https://github.com/wervlad/9_evaluation_selection/actions/workflows/tests.yml">
+    <img alt="mypy" src="https://github.com/wervlad/9_evaluation_selection/actions/workflows/tests.yml/badge.svg">
+</a>
 
 Homework for RS School Machine Learning course.
 
