@@ -78,6 +78,7 @@ def train(
     transform: str,
     search: str,
 ) -> None:
+    """CLI entry point for training models and searching hyperparameters."""
     ctx.ensure_object(dict)
     ctx.obj["dataset_path"] = dataset_path
     ctx.obj["save_model_path"] = save_model_path
@@ -104,6 +105,7 @@ def logreg(
     max_iter: int,
     c: float,
 ) -> None:
+    """Wrapper function for training Logistic Regression model."""
     ctx.obj["model"] = "LogReg"
     ctx.obj["max_iter"] = max_iter
     ctx.obj["c"] = c
@@ -158,6 +160,7 @@ def knn(
     metric: str,
     weights: str,
 ) -> None:
+    """Wrapper function for training KNN model."""
     ctx.obj["model"] = "KNN"
     ctx.obj["n_neighbors"] = n_neighbors
     ctx.obj["metric"] = metric
@@ -178,6 +181,7 @@ def knn(
 
 
 def create_pipeline(use_scaler: bool, model: BaseEstimator) -> Pipeline:
+    """Create pipeline for specified model with or without data scaling."""
     pipeline_steps = []
     if use_scaler:
         pipeline_steps.append(("scaler", StandardScaler()))
@@ -189,6 +193,7 @@ def run_experiment(
     ctx: click.core.Context,
     pipeline: Pipeline,
 ) -> None:
+    """Train model and estimate quality with K-Fold cross validation."""
     with mlflow.start_run():
         accuracy_list = []
         precision_list = []
@@ -264,6 +269,10 @@ def run_experiment_random_grid(
     ctx: click.core.Context,
     pipeline: Pipeline,
 ) -> None:
+    """
+    Search hyperparameters via RandomizedSearchCV and estimate quality with
+    nested cross-validation.
+    """
     with mlflow.start_run():
         accuracy_list = []
         precision_list = []
