@@ -1,8 +1,8 @@
 <a href="https://github.com/wervlad/9_evaluation_selection/blob/main/LICENSE">
     <img alt="GitHub" src="https://img.shields.io/github/license/wervlad/9_evaluation_selection.svg?color=blue">
 </a>
-<a href="https://github.com/psf/black">
-    <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
+<a href="https://github.com/wervlad/9_evaluation_selection/actions/workflows/black.yml">
+    <img alt="Code style: black" src="https://github.com/wervlad/9_evaluation_selection/actions/workflows/black.yml/badge.svg">
 </a>
 
 Homework for RS School Machine Learning course.
