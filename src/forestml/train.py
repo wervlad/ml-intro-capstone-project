@@ -29,7 +29,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
     "--dataset-path",
     default=DATASET_PATH,
     show_default=True,
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    type=click.Path(dir_okay=False, path_type=Path),
 )
 @click.option(
     "-s",
@@ -79,7 +79,7 @@ def train(
     search: str,
 ) -> None:
     ctx.ensure_object(dict)
-    ctx.obj["X"], ctx.obj["y"] = get_dataset(dataset_path)
+    ctx.obj["dataset_path"] = dataset_path
     ctx.obj["save_model_path"] = save_model_path
     ctx.obj["random_state"] = random_state
     ctx.obj["n_splits"] = n_splits
@@ -194,8 +194,9 @@ def run_experiment(
         precision_list = []
         recall_list = []
         f1_list = []
-        X = ctx.obj["X"].to_numpy()
-        y = ctx.obj["y"].to_numpy()
+        X, y = get_dataset(ctx.obj["dataset_path"])
+        X = X.to_numpy()
+        y = y.to_numpy()
         if ctx.obj["transform"] == "tsne":
             X = TSNE(
                 n_components=2,
@@ -269,8 +270,9 @@ def run_experiment_random_grid(
         recall_list = []
         f1_list = []
         best_params_list = []
-        X = ctx.obj["X"].to_numpy()
-        y = ctx.obj["y"].to_numpy()
+        X, y = get_dataset(ctx.obj["dataset_path"])
+        X = X.to_numpy()
+        y = y.to_numpy()
         if ctx.obj["transform"] == "tsne":
             X = TSNE(
                 n_components=2,
