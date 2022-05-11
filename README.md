@@ -43,7 +43,7 @@ Currently only KNN and Linear Regression algorithm are supported.
 
 If you'd like to specify hyperparams manually, use ``manual`` value in ``--search`` argument. E.g. the following command will standardize data and then train and save Logistic Regression model with regularization strenght (C) 10, maximum number of iterations 1000:
 ```sh
-run train --use-scaler True --transform None --search manual logreg --max-iter=1000 --c 10
+poetry run train --use-scaler True --transform None --search manual logreg --max-iter=1000 --c 10
 ```
 
 You can configure additional options (such as hyperparameters) in the CLI. To get a full list of them, use help:
