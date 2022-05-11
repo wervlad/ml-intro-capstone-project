@@ -42,7 +42,7 @@ def black(session: Session) -> None:
 
 @nox.session(python="3.9")
 def black_check(session: Session) -> None:
-    """Run black code formatter."""
+    """Run black code checker without modifying files."""
     args = session.posargs or locations
     install_with_constraints(session, "black")
     session.run("black", "--check", "--line-length", "79", *args)
@@ -50,7 +50,7 @@ def black_check(session: Session) -> None:
 
 @nox.session(python="3.9")
 def flake8(session: Session) -> None:
-    """Run black code formatter."""
+    """Run flake8 code checker."""
     args = session.posargs or locations
     install_with_constraints(session, "flake8")
     session.run("flake8", *args)
