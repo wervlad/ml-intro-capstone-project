@@ -17,6 +17,7 @@ def get_dataset(
     return_X_y: bool = True,
     drop_columns: bool = True,
 ) -> Any:
+    """Load dataset from specified path."""
     dataset = pd.read_csv(csv_path)
     click.echo(f"Dataset shape: {dataset.shape}.")
     if drop_columns:
@@ -45,6 +46,7 @@ def get_dataset(
     type=click.Path(dir_okay=False, writable=True, path_type=Path),
 )
 def generate_profiling_report(csv_path: Path, report_path: Path) -> None:
+    """Generate pandas-profiling report for dataset in specified path."""
     profile = pandas_profiling.ProfileReport(
         get_dataset(csv_path, return_X_y=False, drop_columns=False),
         minimal=False,
