@@ -14,7 +14,9 @@
     <img alt="mypy" src="https://github.com/wervlad/9_evaluation_selection/actions/workflows/tests.yml/badge.svg">
 </a>
 
-Homework for RS School Machine Learning course.
+<br>
+
+# Homework for RS School Machine Learning course
 
 This project uses [Forest train](https://www.kaggle.com/competitions/forest-cover-type-prediction) dataset.
 
