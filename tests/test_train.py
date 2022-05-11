@@ -98,6 +98,7 @@ def test_train_fails_with_invalid_knn_weights_value(runner: CliRunner) -> None:
 def test_train_manual_search_generates_model_successfully(
     runner: CliRunner,
 ) -> None:
+    """It checks manual search generates model successfully."""
     with runner.isolated_filesystem():
         generate_test_dataset()
         model_path = Path(data.MODEL_PATH)
@@ -126,6 +127,7 @@ def test_train_manual_search_generates_model_successfully(
 def test_train_random_search_generates_model_successfully(
     runner: CliRunner,
 ) -> None:
+    """It checks random search generates model successfully."""
     with runner.isolated_filesystem():
         generate_test_dataset()
         model_path = Path(data.MODEL_PATH)
@@ -148,6 +150,7 @@ def test_train_random_search_generates_model_successfully(
 
 
 def is_saved_model_correct(path: Path) -> bool:
+    """It checks saved model for correctness."""
     X, _ = data.get_dataset(Path(data.DATASET_PATH))
     X = X.to_numpy()
     obj = joblib.load(path)
