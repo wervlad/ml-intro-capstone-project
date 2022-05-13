@@ -3,6 +3,9 @@ SOURCES = $(wildcard *.py) $(wildcard */*.py) $(wildcard */*/*.py)
 tests:
 	nox -rs tests
 
+predict:
+	poetry run predict
+
 run_mlflow_ui:
 	poetry run mlflow ui
 
