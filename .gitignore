@@ -140,3 +140,6 @@ include_tags
 
 # vim
 *.swp
+
+# crosscheck
+crosscheck
