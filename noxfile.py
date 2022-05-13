@@ -2,6 +2,7 @@
 import tempfile
 import nox
 from nox.sessions import Session
+import os
 from typing import Any
 
 nox.options.sessions = "black", "flake8", "mypy", "tests"
@@ -19,7 +20,7 @@ def install_with_constraints(
     but we use versions from poetry.lock instead to guarantee reproducibility
     of sessions.
     """
-    with tempfile.NamedTemporaryFile() as requirements:
+    with tempfile.NamedTemporaryFile(delete=False) as requirements:
         session.run(
             "poetry",
             "export",
@@ -30,6 +31,8 @@ def install_with_constraints(
             external=True,
         )
         session.install(f"--constraint={requirements.name}", *args, **kwargs)
+        requirements.close()
+        os.unlink(requirements.name)
 
 
 @nox.session(python="3.9")
