@@ -115,12 +115,20 @@ def logreg(
     if ctx.obj["search"] == "manual":
         run_experiment(
             ctx,
-            create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+            create_pipeline(
+                use_scaler=ctx.obj["use_scaler"],
+                transform=ctx.obj["transform"],
+                model=model,
+            ),
         )
     else:
         run_experiment_random_grid(
             ctx,
-            create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+            create_pipeline(
+                use_scaler=ctx.obj["use_scaler"],
+                transform=ctx.obj["transform"],
+                model=model,
+            ),
         )
 
 
@@ -171,20 +179,57 @@ def knn(
     if ctx.obj["search"] == "manual":
         run_experiment(
             ctx,
-            create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+            create_pipeline(
+                use_scaler=ctx.obj["use_scaler"],
+                transform=ctx.obj["transform"],
+                model=model,
+            ),
         )
     else:
         run_experiment_random_grid(
             ctx,
-            create_pipeline(use_scaler=ctx.obj["use_scaler"], model=model),
+            create_pipeline(
+                use_scaler=ctx.obj["use_scaler"],
+                transform=ctx.obj["transform"],
+                model=model,
+            ),
         )
 
 
-def create_pipeline(use_scaler: bool, model: BaseEstimator) -> Pipeline:
+def create_pipeline(
+    use_scaler: bool, transform: str, model: BaseEstimator
+) -> Pipeline:
     """Create pipeline for specified model with or without data scaling."""
     pipeline_steps = []
     if use_scaler:
         pipeline_steps.append(("scaler", StandardScaler()))
+
+    if transform == "tsne":
+        pipeline_steps.append(
+            (
+                "transform",
+                TSNE(
+                    n_components=2,
+                    learning_rate="auto",
+                    init="pca",
+                ),
+            )
+        )
+    elif transform == "lda":
+        pipeline_steps.append(
+            (
+                "transform",
+                LinearDiscriminantAnalysis(
+                    n_components=2,
+                    priors=None,
+                    shrinkage="auto",
+                    solver="eigen",
+                    store_covariance=False,
+                    tol=0.0001,
+                ),
+            )
+        )
+
     pipeline_steps.append(("classifier", model))
     return Pipeline(steps=pipeline_steps)
 
@@ -202,22 +247,6 @@ def run_experiment(
         X, y = get_dataset(ctx.obj["dataset_path"])
         X = X.to_numpy()
         y = y.to_numpy()
-        if ctx.obj["transform"] == "tsne":
-            X = TSNE(
-                n_components=2,
-                learning_rate="auto",
-                init="pca",
-                random_state=42,
-            ).fit_transform(X)
-        elif ctx.obj["transform"] == "lda":
-            X = LinearDiscriminantAnalysis(
-                n_components=2,
-                priors=None,
-                shrinkage="auto",
-                solver="eigen",
-                store_covariance=False,
-                tol=0.0001,
-            ).fit_transform(X, y)
         kf = KFold(
             n_splits=ctx.obj["n_splits"],
             shuffle=True,
@@ -282,22 +311,6 @@ def run_experiment_random_grid(
         X, y = get_dataset(ctx.obj["dataset_path"])
         X = X.to_numpy()
         y = y.to_numpy()
-        if ctx.obj["transform"] == "tsne":
-            X = TSNE(
-                n_components=2,
-                learning_rate="auto",
-                init="pca",
-                random_state=42,
-            ).fit_transform(X)
-        elif ctx.obj["transform"] == "lda":
-            X = LinearDiscriminantAnalysis(
-                n_components=2,
-                priors=None,
-                shrinkage="auto",
-                solver="eigen",
-                store_covariance=False,
-                tol=0.0001,
-            ).fit_transform(X, y)
         cv_outer = KFold(
             n_splits=10, shuffle=True, random_state=ctx.obj["random_state"]
         )
