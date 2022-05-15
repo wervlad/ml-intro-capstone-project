@@ -12,6 +12,7 @@ authors = ["Vlad Rusakov"]
 train = "forestml.train:train"
 profiling_report = "forestml.data:generate_profiling_report"
 predict = "forestml.predict:predict"
+generate_test_true = "forestml.dataset_generator:generate_test_true"
 
 [tool.poetry.dependencies]
 python = "^3.9"
